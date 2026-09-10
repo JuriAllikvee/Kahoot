@@ -18,8 +18,8 @@ const pb = {
       const { values } = JSON.parse(params.filter);
       return structuredClone(records[name].filter(row => name === 'quizzes' ? row.owner === values.owner : row.quiz === values.quiz));
     },
-    async getOne(id) { return structuredClone(records[name].find(row => row.id === id)); },
-    async create(data) { const row = { ...data, id: String(++sequence) }; records[name].push(row); return structuredClone(row); },
+    async getOne(id) { const row = records[name].find(row => row.id === id); if (!row) throw Object.assign(new Error('Not found'), { status: 404 }); return structuredClone(row); },
+    async create(data) { const row = { ...data, id: data.id || String(++sequence) }; if (records[name].some(item => item.id === row.id)) throw Object.assign(new Error('Duplicate'), { status: 400 }); records[name].push(row); return structuredClone(row); },
     async update(id, data) { const row = records[name].find(row => row.id === id); Object.assign(row, data); return structuredClone(row); },
     async delete(id) { records[name] = records[name].filter(row => row.id !== id); return true; },
   }),
@@ -110,5 +110,20 @@ test('host can create, edit, reorder, publish, unpublish and delete questions us
   await click('Delete question');
   assert.equal(records.questions.length, 1);
   assert.ok(calls.some(([name, action, params]) => name === 'quizzes' && action === 'list' && JSON.parse(params.filter).values.owner === 'owner'));
+  await click('Use ready-made quiz');
+  // WebCrypto completes outside React's synchronous event turn.
+  for (let attempt = 0; attempt < 100 && document.querySelector('[aria-busy="true"]'); attempt++) {
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 10)); });
+  }
+  assert.equal(document.querySelector('[role="alert"]'), null);
+  assert.match(document.body.textContent, /Questions \(10\)/);
+  const quizCount = records.quizzes.length;
+  const questionCount = records.questions.length;
+  await click('Use ready-made quiz');
+  for (let attempt = 0; attempt < 100 && document.querySelector('[aria-busy="true"]'); attempt++) {
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 10)); });
+  }
+  assert.equal(records.quizzes.length, quizCount);
+  assert.equal(records.questions.length, questionCount);
   await act(async () => root.unmount());
 });

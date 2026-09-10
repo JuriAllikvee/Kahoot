@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from '../components/AuthModal';
 import PageShell from '../components/PageShell';
+import { saveReadyMadeQuiz } from '../lib/quizPreset.js';
 import { pb } from '../lib/pocketbase';
 import { formatQuizError, validatePublication, validateQuestion, validateTitle } from '../lib/quizValidation.js';
 
@@ -161,6 +162,15 @@ function HostWorkspace({ user, logout }) {
       <div className="page-heading"><div><p className="eyebrow">HOST SPACE</p><h1>Your quizzes</h1><p>Create questions, choose the answers, and publish when ready.</p></div><span className="account-label">{user.name || user.email}</span></div>
       {error && <div className="error-message" role="alert">{error}</div>}
       <p className="host-notice" role="status">{busy ? 'Saving or loading…' : notice}</p>
+      <section className="host-create" aria-label="Ready-made quiz">
+        <div><h2>Ready-made quiz</h2><p className="field-help">10 questions in Russian: general knowledge and IT. Saved once to your account; use this button again to reopen it. Your edits are kept.</p><p className="field-help">If saving is interrupted, retry this button to resume. Live games are not available yet.</p></div>
+        <button className="button secondary" disabled={disabled || !!draft || (!!selected && title !== selected.title)} onClick={() => run(async () => {
+          try {
+            const quiz = await saveReadyMadeQuiz(pb, user.id);
+            await reloadQuiz(quiz.id); setDraft(null);
+          } finally { setQuizzes(await listQuizzes()); }
+        }, 'Ready-made quiz opened. You can review, edit, and publish it.')}>Use ready-made quiz</button>
+      </section>
       <form className="host-create" onSubmit={createQuiz}>
         <div className="field"><label htmlFor="new-quiz-title">New quiz title</label><input id="new-quiz-title" value={newTitle} onChange={event => setNewTitle(event.target.value)} maxLength={100} required disabled={disabled || !!draft} placeholder="e.g. Friday trivia" /></div>
         <button className="button primary" disabled={disabled || !!draft}>Create a quiz</button>

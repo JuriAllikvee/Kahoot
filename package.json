@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test": "node --test src/lib/quizValidation.test.js src/pages/HostPage.test.js",
+    "test": "node --test src/lib/quizValidation.test.js src/lib/quizPreset.test.js src/pages/HostPage.test.js",
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
