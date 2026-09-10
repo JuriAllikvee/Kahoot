@@ -2,6 +2,8 @@
 
 A multiplayer real-time quiz application built with **React (Vite)**, **Tailwind CSS**, and **PocketBase**, deployed on **Coolify**.
 
+**Live PocketBase**: http://pocketbase-bzmqz78h0ehdz5mnq2t4eumx.176.112.158.15.sslip.io
+
 ## Features
 
 - **Host (Teacher)**: Create quizzes, manage questions, run games, see results in real-time
@@ -37,34 +39,22 @@ cd Kahoot
 npm install
 ```
 
-### 2. PocketBase
-
-Download [PocketBase](https://pocketbase.io) and run locally:
-
-```bash
-./pocketbase serve
-```
-
-Visit http://localhost:8090/_ for admin panel.
-
-**Import Schema**: Settings → Collections → Import (`pb_schema.json`)
-
-### 3. Environment Variables
+### 2. Environment Variables
 
 ```bash
 cp .env.example .env.local
-# Edit .env.local:
-VITE_POCKETBASE_URL=http://localhost:8090
 ```
 
-### 4. Development
+The `.env.local` already has the PocketBase URL configured.
+
+### 3. Development
 
 ```bash
 npm run dev
 # http://localhost:5173
 ```
 
-### 5. Production Build
+### 4. Production Build
 
 ```bash
 npm run build
@@ -76,6 +66,12 @@ npm run build
 - `/host` — Host dashboard (create quizzes, manage games)
 - `/play` — Join game (enter code + nickname)
 
+## PocketBase Schema Import
+
+1. Visit PocketBase admin: http://pocketbase-bzmqz78h0ehdz5mnq2t4eumx.176.112.158.15.sslip.io
+2. Go to **Settings** → **Import collections**
+3. Upload `pb_schema.json` from this repo
+
 ## PocketBase Hooks
 
 Server-side logic in `pb_hooks/main.pb.js`:
@@ -83,8 +79,6 @@ Server-side logic in `pb_hooks/main.pb.js`:
 ### 1. Game Code Generation
 
 When a game is created, a unique 6-character code (A-Z, 0-9) is automatically generated.
-
-**Why server-side?** — Client cannot guarantee unique codes.
 
 ### 2. Answer Processing & Scoring
 
@@ -101,19 +95,6 @@ For correct answers:
 Incorrect answer: 0 points
 
 **Protection**: Client sends only `optionIndex`. Fields `isCorrect` and `points` are stripped and recalculated server-side.
-
-### Deploying Hooks to Coolify
-
-Hooks are stored as a volume in the PocketBase container. In `docker-compose.yml`:
-
-```yaml
-volumes:
-  - ./pb_hooks:/pb/pb_hooks
-```
-
-After updating `pb_hooks/main.pb.js`:
-1. Redeploy container (Coolify → Redeploy)
-2. Or enable hot reload if PocketBase supports it
 
 ## API Rules
 
@@ -143,8 +124,6 @@ After updating `pb_hooks/main.pb.js`:
 ### Problem 3: Player answers after time expires
 
 **Solution**: API rule checks `game.status = "question"`. When host moves to results, status changes and new answers are rejected.
-
-**Remaining vulnerability**: Local clock manipulation. **Fix**: Server-side time check in hook.
 
 ## Dependencies
 
@@ -179,8 +158,18 @@ Kahoot/
 ├── package.json
 ├── vite.config.js
 ├── index.html
-└── README.md
+├── README.md
+└── REPORT.md
 ```
+
+## Coolify Deployment
+
+See **COOLIFY_SETUP.md** for full deployment instructions.
+
+Quick summary:
+- **Build command**: `npm run build`
+- **Publish directory**: `dist`
+- **Environment**: `VITE_POCKETBASE_URL=http://pocketbase-bzmqz78h0ehdz5mnq2t4eumx.176.112.158.15.sslip.io`
 
 ## License
 
