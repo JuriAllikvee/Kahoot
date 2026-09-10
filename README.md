@@ -1,124 +1,124 @@
 # Real-Time Quiz Game (Kahoot-like)
 
-Мультиплеерная викторина в реальном времени на **React (Vite)**, **Tailwind CSS** и **PocketBase**, развернутая на **Coolify**.
+A multiplayer real-time quiz application built with **React (Vite)**, **Tailwind CSS**, and **PocketBase**, deployed on **Coolify**.
 
-## Особенности
+## Features
 
-- **Хост (учитель)**: Создание викторин, управление вопросами, запуск игры, видение результатов в реальном времени
-- **Игроки**: Присоединение по коду, ответы на вопросы, подсчет баллов в зависимости от скорости и правильности
-- **Реальное время**: Использование PocketBase subscriptions — без polling
-- **Безопасность**: Серверная логика через PocketBase hooks — невозможно подделать баллы
-- **Состояния игры**: lobby → question → results → finished
+- **Host (Teacher)**: Create quizzes, manage questions, run games, see results in real-time
+- **Players**: Join via code, answer questions, earn points based on speed and correctness
+- **Real-time**: PocketBase subscriptions — no polling
+- **Security**: Server-side logic via PocketBase hooks — impossible to cheat points
+- **Game States**: lobby → question → results → finished
 
-## Структура данных
+## Data Structure
 
-### Коллекции
+### Collections
 
-| Коллекция | Назначение |
-|-----------|-----------|
-| `quizzes` | Викторины (может быть много вопросов) |
-| `questions` | Вопросы с вариантами ответов и правильным ответом |
-| `games` | Экземпляры запущенных игр |
-| `players` | Участники игры |
-| `answers` | Ответы игроков (обработка баллов на сервере) |
+| Collection | Purpose |
+|-----------|---------|
+| `quizzes` | Quiz templates (can have many questions) |
+| `questions` | Questions with options and correct answer |
+| `games` | Running game instances |
+| `players` | Game participants |
+| `answers` | Player answers (server-side scoring) |
 
-### Уникальные индексы
+### Unique Indexes
 
-- `answers(player, question)` — один ответ на вопрос на игрока
-- `players(game, nickname)` — уникальный никнейм в пределах игры
+- `answers(player, question)` — one answer per question per player
+- `players(game, nickname)` — unique nickname per game
 
-## Установка и запуск
+## Installation & Setup
 
-### 1. Клонирование и зависимости
+### 1. Clone & Dependencies
 
 ```bash
-git clone https://github.com/DimaAllikvee/pocketbase-quiz-app.git
-cd pocketbase-quiz-app
+git clone https://github.com/JuriAllikvee/Kahoot.git
+cd Kahoot
 npm install
 ```
 
 ### 2. PocketBase
 
-Скачайте [PocketBase](https://pocketbase.io) и запустите локально:
+Download [PocketBase](https://pocketbase.io) and run locally:
 
 ```bash
 ./pocketbase serve
 ```
 
-Перейдите на http://localhost:8090/_ для администрирования.
+Visit http://localhost:8090/_ for admin panel.
 
-**Импорт схемы**: Settings → Collections → Import (`pb_schema.json`)
+**Import Schema**: Settings → Collections → Import (`pb_schema.json`)
 
-### 3. Переменные окружения
+### 3. Environment Variables
 
 ```bash
 cp .env.example .env.local
-# Отредактируйте .env.local:
+# Edit .env.local:
 VITE_POCKETBASE_URL=http://localhost:8090
 ```
 
-### 4. Развитие
+### 4. Development
 
 ```bash
 npm run dev
 # http://localhost:5173
 ```
 
-### 5. Production сборка
+### 5. Production Build
 
 ```bash
 npm run build
 ```
 
-## Маршруты
+## Routes
 
-- `/` — Главная страница (выбор: Host или Play)
-- `/host` — Панель хоста (создание викторин, управление играми)
-- `/play` — Присоединение к игре (код + никнейм)
+- `/` — Home page (choose Host or Play)
+- `/host` — Host dashboard (create quizzes, manage games)
+- `/play` — Join game (enter code + nickname)
 
 ## PocketBase Hooks
 
-Серверная логика находится в `pb_hooks/main.pb.js`:
+Server-side logic in `pb_hooks/main.pb.js`:
 
-### 1. Создание игры (генерация кода)
+### 1. Game Code Generation
 
-При создании игры автоматически генерируется 6-значный код (A-Z, 0-9).
+When a game is created, a unique 6-character code (A-Z, 0-9) is automatically generated.
 
-**Почему на сервере?** — Клиент не может генерировать гарантированно уникальные коды.
+**Why server-side?** — Client cannot guarantee unique codes.
 
-### 2. Обработка ответов (вычисление баллов)
+### 2. Answer Processing & Scoring
 
 ```javascript
 points = max(500, round(1000 * (1 - elapsed / timeLimit / 2)))
 ```
 
-Если ответ правильный:
-- Берем время начала вопроса (`game.questionStartedAt`)
-- Вычисляем затраченное время
-- Формула вознаграждает быстрые ответы
-- Минимум 500 баллов за правильный ответ
+For correct answers:
+- Get question start time (`game.questionStartedAt`)
+- Calculate elapsed time
+- Formula rewards fast answers
+- Minimum 500 points for correct answer
 
-Если ответ неправильный: 0 баллов
+Incorrect answer: 0 points
 
-**Защита**: Клиент отправляет только `optionIndex`. Поля `isCorrect` и `points` удаляются и переписываются сервером.
+**Protection**: Client sends only `optionIndex`. Fields `isCorrect` and `points` are stripped and recalculated server-side.
 
-### Развертывание hooks в Coolify
+### Deploying Hooks to Coolify
 
-Hooks хранятся в контейнере PocketBase как volume. В `docker-compose.yml` или настройках Coolify:
+Hooks are stored as a volume in the PocketBase container. In `docker-compose.yml`:
 
 ```yaml
 volumes:
   - ./pb_hooks:/pb/pb_hooks
 ```
 
-После изменения `pb_hooks/main.pb.js`:
-1. Пересоберите контейнер (Coolify → Redeploy)
-2. Или используйте горячую перезагрузку PocketBase (если включена)
+After updating `pb_hooks/main.pb.js`:
+1. Redeploy container (Coolify → Redeploy)
+2. Or enable hot reload if PocketBase supports it
 
-## API Правила
+## API Rules
 
-| Коллекция | Действие | Правило |
-|-----------|---------|--------|
+| Collection | Action | Rule |
+|-----------|--------|------|
 | `quizzes` | list, view | `isPublished = true \|\| owner = @request.auth.id` |
 | `quizzes` | create | `@request.auth.id != ""` |
 | `quizzes` | update, delete | `owner = @request.auth.id` |
@@ -126,38 +126,38 @@ volumes:
 | `questions` | create, update, delete | `quiz.owner = @request.auth.id` |
 | `games` | create | `@request.auth.id != "" && host = @request.auth.id` |
 | `games` | update | `host = @request.auth.id` |
-| `players` | create | `game.status = "lobby"` (аноним может присоединиться) |
+| `players` | create | `game.status = "lobby"` (anonymous join allowed) |
 | `answers` | create | `game.status = "question" && player.game = game && question = game.currentQuestion` |
-| `answers` | list, view | `game.host = @request.auth.id` (только хост видит ответы) |
+| `answers` | list, view | `game.host = @request.auth.id` (only host sees answers) |
 
-## Защита от читерства
+## Anti-Cheat Protection
 
-### Проблема 1: Клиент подделывает `isCorrect` и `points`
+### Problem 1: Client fakes `isCorrect` and `points`
 
-**Решение**: Hook удаляет эти поля и переписывает их на основе проверки сервера.
+**Solution**: Hook strips these fields and recalculates based on server-side verification.
 
-### Проблема 2: Игрок отправляет несколько ответов на один вопрос
+### Problem 2: Player submits multiple answers per question
 
-**Решение**: Уникальный индекс `answers(player, question)` блокирует повторные попытки.
+**Solution**: Unique index `answers(player, question)` blocks duplicates.
 
-### Проблема 3: Игрок отвечает после истечения времени
+### Problem 3: Player answers after time expires
 
-**Решение**: API rule проверяет `game.status = "question"`. Когда хост переходит к результатам, статус меняется, и новые ответы отклоняются.
+**Solution**: API rule checks `game.status = "question"`. When host moves to results, status changes and new answers are rejected.
 
-**Оставшаяся уязвимость**: Определение момента окончания времени на клиенте. Игрок с манипулированными часами может отправить ответ после истечения таймера. **Решение**: На сервере проверить `elapsed < timeLimit` в hook'е и отклонить просроченные ответы.
+**Remaining vulnerability**: Local clock manipulation. **Fix**: Server-side time check in hook.
 
-## Зависимости
+## Dependencies
 
 - **React** 19+ — UI
-- **React Router** 6+ — Навигация
-- **Tailwind CSS** 4+ — Стили (Telegram-подобный дизайн)
-- **PocketBase SDK** — Клиент БД
-- **Vite** — Сборщик
+- **React Router** 6+ — Navigation
+- **Tailwind CSS** 4+ — Styling (Telegram-like design)
+- **PocketBase SDK** — Database client
+- **Vite** — Build tool
 
-## Файловая структура
+## Project Structure
 
 ```
-pocketbase-quiz-app/
+Kahoot/
 ├── src/
 │   ├── App.jsx
 │   ├── main.jsx
@@ -182,6 +182,6 @@ pocketbase-quiz-app/
 └── README.md
 ```
 
-## Лицензия
+## License
 
 MIT

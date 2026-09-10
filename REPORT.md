@@ -1,48 +1,48 @@
 # Quiz Game — REPORT.md
 
-## Архитектура и состояния игры
+## Architecture & Game States
 
-### Диаграмма состояний
+### State Diagram
 
 ```
 ┌─────────┐
-│  lobby  │ ← Хост запускает игру, игроки присоединяются
+│  lobby  │ ← Host starts game, players join
 └────┬────┘
      │ host: startQuestion()
      ▼
 ┌──────────┐
-│ question │ ← Показываем вопрос, игроки отвечают
+│ question │ ← Show question, players answer
 └────┬─────┘
      │ timeout || host: nextQuestion()
      ▼
 ┌─────────┐
-│ results │ ← Показываем результаты этого вопроса
+│ results │ ← Show results for this question
 └────┬────┘
      │ lastQuestion? → finished : back to question
      ▼
 ┌──────────┐
-│ finished │ ← Итоговая таблица лидеров
+│ finished │ ← Final leaderboard
 └──────────┘
 ```
 
-**Кто меняет состояние:**
-- **Хост** (`games.host`) — обновляет `games.status` и `games.currentQuestion`
-- **Система** (PocketBase rules) — блокирует несовместимые операции
-- **Клиенты** — слушают изменения через `pb.collection('games').subscribe()`
+**Who changes state:**
+- **Host** (`games.host`) — updates `games.status` and `games.currentQuestion`
+- **System** (PocketBase rules) — blocks incompatible operations
+- **Clients** — listen to changes via `pb.collection('games').subscribe()`
 
-### Модель безопасности точек
+### Points Security Model
 
-#### Проблема 1: Клиент подделывает баллы
+#### Problem 1: Client fakes points
 
-**Угроза**: Игрок может отправить ответ с `isCorrect: true, points: 1000`
+**Threat**: Player sends answer with `isCorrect: true, points: 1000`
 
-**Решение**: PocketBase hook при создании ответа:
-1. Удаляет `isCorrect` и `points` из запроса
-2. Получает вопрос и сравнивает `optionIndex` с `correctIndex`
-3. Вычисляет баллы по формуле на сервере
-4. Устанавливает окончательные значения
+**Solution**: PocketBase hook on answer creation:
+1. Strips `isCorrect` and `points` from request
+2. Fetches question and compares `optionIndex` with `correctIndex`
+3. Calculates points server-side using formula
+4. Sets final values
 
-**Код**:
+**Code**:
 ```javascript
 onRecordCreateRequest((e) => {
   e.record.isCorrect = undefined;
@@ -52,137 +52,138 @@ onRecordCreateRequest((e) => {
   e.record.isCorrect = question.correctIndex === e.record.optionIndex;
   
   if (e.record.isCorrect) {
-    // Вычисляем баллы...
+    // Calculate points...
   }
   e.record.points = points;
 });
 ```
 
-#### Проблема 2: Множественные ответы на один вопрос
+#### Problem 2: Multiple answers per question
 
-**Угроза**: Игрок отправляет несколько ответов, система принимает лучший
+**Threat**: Player submits multiple answers, system accepts best one
 
-**Решение**: Уникальный индекс в PocketBase
+**Solution**: Unique index in PocketBase
 ```sql
 UNIQUE(answers.player, answers.question)
 ```
 
-Попытка создать дубликат — ошибка 409 Conflict.
+Duplicate attempts fail with 409 Conflict.
 
-#### Проблема 3: Просроченные ответы
+#### Problem 3: Late answers after timeout
 
-**Угроза**: Клиент может игнорировать `timeLimit` и отправить ответ позже
+**Threat**: Client ignores `timeLimit` and submits answer later
 
-**Текущее решение**: API rule проверяет `game.status = "question"`
+**Current solution**: API rule checks `game.status = "question"`
 ```javascript
 createRule: "game.status = \"question\" && ..."
 ```
 
-Когда хост видит результаты, статус меняется на `"results"`, и новые ответы отклоняются.
+When host sees results, status changes to `"results"` and new answers are rejected.
 
-**Остаток уязвимости**: Если хост медленно нажимает кнопку Next, интервал может быть уязвим.
+**Remaining vulnerability**: If host delays clicking Next, there's a window.
 
-**Улучшение**: В hook'е добавить проверку времени:
+**Enhancement**: Add server-side time check in hook:
 ```javascript
 const elapsed = (now - startTime) / 1000;
-if (elapsed > question.timeLimit + 2) { // +2 сек буфер
+if (elapsed > question.timeLimit + 2) { // +2 sec buffer
   throw new BadRequestError("Answer submitted too late");
 }
 ```
 
-#### Проблема 4: Изменение оценки после ответа
+#### Problem 4: Changing answer after submission
 
-**Решение**: `answers` only create — нет update rule.
-Игрок не может изменить ответ, хост может удалить (но баллы не пересчитываются автоматически).
+**Solution**: `answers` create-only — no update rule.
+Player cannot modify answer. Host can delete (but score not auto-recalculated).
 
-### Оставшиеся риски
+### Remaining Risks
 
-1. **Манипуляция часами на клиенте** — требует серверной проверки времени (см. выше)
-2. **Сетевая задержка** — мужно добавить +1-2 сек буфер при проверке
-3. **Режим отладки браузера** — опытный читер может модифицировать localStorage, но это не повлияет на баллы (они рассчитываются на сервере)
+1. **Local clock manipulation** — requires server-side time verification (see above)
+2. **Network latency** — needs +1-2 sec buffer in time check
+3. **Browser dev tools** — attacker can modify localStorage, but won't affect server-calculated scores
 
 ---
 
-## Развертывание PocketBase hooks
+## Deploying PocketBase Hooks
 
-### Локально
+### Locally
 
-1. Скачайте [PocketBase](https://pocketbase.io)
-2. Создайте папку `pb_hooks` в корне
-3. Поместите `main.pb.js` в `pb_hooks/`
-4. Запустите PocketBase:
+1. Download [PocketBase](https://pocketbase.io)
+2. Create `pb_hooks` folder in root
+3. Place `main.pb.js` in `pb_hooks/`
+4. Run PocketBase:
    ```bash
    ./pocketbase serve
    ```
-5. Hooks автоматически загружаются и перекомпилируются при изменении файлов
+5. Hooks auto-load and recompile on file changes
 
-### На Coolify
+### On Coolify
 
-1. В `docker-compose.yml` или конфигурации контейнера PocketBase добавьте volume:
+1. In `docker-compose.yml` or PocketBase container config, add volume:
    ```yaml
    volumes:
      - ./pb_hooks:/pb/pb_hooks
    ```
 
-2. Перестройте контейнер после изменения hooks:
+2. Redeploy after hook changes:
    ```bash
    coolify redeploy <service_id>
    ```
 
-3. Или используйте File Storage в Coolify для редактирования `pb_hooks/main.pb.js` и автоматической перезагрузки
+3. Or edit `pb_hooks/main.pb.js` via Coolify File Storage with auto-reload
 
-### Отладка
+### Debugging
 
-- Логи PocketBase: `./pocketbase logs` или Coolify Dashboard
-- Тестируйте hooks локально перед развертыванием
-- Проверяйте синтаксис JavaScripта в hooks (PocketBase использует Go interpreter)
-
----
-
-## Что получилось
-
-✅ **Реализовано**:
-- Структура БД с коллекциями и индексами
-- Серверная генерация кодов игр
-- PocketBase hooks для обработки ответов и расчета баллов
-- API rules для блокировки несанкционированных действий
-- React компоненты: Home, Auth, JoinGame, HostPage
-- Telegram-подобный дизайн (Tailwind CSS)
-- Real-time subscriptions (вместо polling)
-
-❌ **Не завершено (следующие этапы)**:
-- Интерфейс редактора вопросов на хосте
-- Экран игры для игрока (вопрос + таймер + варианты ответов)
-- Экран результатов с диаграммой ответов
-- Итоговая таблица лидеров
-- QR-код для быстрого присоединения
-- Аудиосигналы при старте/окончании вопроса
-- Сохранение истории игр
+- PocketBase logs: `./pocketbase logs` or Coolify Dashboard
+- Test hooks locally before deploying
+- Check JavaScript syntax in hooks (PocketBase uses Go interpreter)
 
 ---
 
-## Проблемы и решения
+## What's Implemented
 
-### 1. Hook'и не перекомпилируются автоматически на Coolify
+✅ **Done**:
+- Database schema with collections and indexes
+- Server-side game code generation
+- PocketBase hooks for answer processing and point calculation
+- API rules for authorization
+- React components: Home, Auth, JoinGame, HostPage
+- Telegram-style design (Tailwind CSS)
+- Real-time subscriptions (no polling)
 
-**Решение**: Добавить скрипт в `docker-entrypoint.sh` для пересборки или использовать горячую перезагрузку PocketBase.
-
-### 2. Синтаксическая ошибка в hook'е убивает весь PocketBase
-
-**Решение**: Тестируйте hooks локально. PocketBase может не дать четкого сообщения об ошибке — проверяйте логи.
-
-### 3. Race condition: две игры получают один код
-
-**Решение**: Уникальный индекс на `games.code` + попыток генерации кода до 10 раз.
+❌ **Next Steps (TODO)**:
+- Question editor UI on host
+- Player game screen (question + timer + options)
+- Results screen with answer distribution
+- Final leaderboard
+- QR code for quick join
+- Audio signals on start/end
+- Game history & replay
+- Prevent joining mid-game
 
 ---
 
-## Аруанде заключение
+## Issues & Solutions
 
-Проект демонстрирует:
-- Безопасность через серверные hooks (невозможно подделать баллы)
-- Real-time синхронизацию между множеством клиентов
-- Сложное состояние игры с несколькими участниками
-- Правильное разделение ролей (хост vs игрок) в одном приложении
+### 1. Hooks don't auto-reload on Coolify
 
-Следующие шаги: интерфейсы игры, Q&A в реальном времени, история игр.
+**Solution**: Add `docker-entrypoint.sh` for rebuild or use PocketBase hot reload.
+
+### 2. Syntax error in hook kills entire PocketBase
+
+**Solution**: Test locally. Check logs carefully — PocketBase may not give clear error messages.
+
+### 3. Race condition: two games get same code
+
+**Solution**: Unique index on `games.code` + retry logic (up to 10 attempts).
+
+---
+
+## Summary
+
+This project demonstrates:
+- **Security** via server-side hooks (impossible to cheat)
+- **Real-time sync** across many clients
+- **Complex state** with multiple participants
+- **Proper role separation** (host vs player) in single app
+
+Next: Game UI, Q&A real-time, history tracking.
