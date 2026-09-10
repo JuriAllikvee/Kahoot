@@ -1,448 +1,562 @@
-{
-  "collections": [
-    {
-      "id": "users",
-      "name": "users",
-      "type": "auth",
-      "system": false,
-      "authRule": "@request.auth.id != \"\"",
-      "listRule": "@request.auth.id != \"\"",
-      "viewRule": "@request.auth.id != \"\"",
-      "createRule": "",
-      "updateRule": "@request.auth.id = id",
-      "deleteRule": "@request.auth.id = id",
-      "options": {
-        "allowEmailAuth": true,
-        "allowOAuth2Auth": false,
-        "allowUsernameAuth": false,
-        "exceptEmailDomains": null,
-        "onlyEmailDomains": null,
-        "minPasswordLength": 8,
-        "requireEmail": false
+[
+  {
+    "id": "quizzes",
+    "name": "quizzes",
+    "type": "base",
+    "system": false,
+    "listRule": "isPublished = true || owner = @request.auth.id",
+    "viewRule": "isPublished = true || owner = @request.auth.id",
+    "createRule": "@request.auth.id != \"\" && owner = @request.auth.id",
+    "updateRule": "owner = @request.auth.id",
+    "deleteRule": "owner = @request.auth.id",
+    "fields": [
+      {
+        "system": true,
+        "id": "text3208210256",
+        "name": "id",
+        "type": "text",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 15,
+          "max": 15,
+          "pattern": "^[a-z0-9]+$"
+        }
       },
-      "fields": [
-        {
-          "id": "text3208640144",
-          "name": "name",
-          "type": "text",
-          "system": false,
-          "required": false,
-          "unique": false,
-          "options": {
-            "min": null,
-            "max": 100,
-            "pattern": ""
-          }
+      {
+        "system": false,
+        "id": "text1234567890",
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 100,
+          "pattern": ""
         }
-      ]
-    },
-    {
-      "id": "quizzes",
-      "name": "quizzes",
-      "type": "base",
-      "system": false,
-      "listRule": "isPublished = true || owner = @request.auth.id",
-      "viewRule": "isPublished = true || owner = @request.auth.id",
-      "createRule": "@request.auth.id != \"\" && owner = @request.auth.id",
-      "updateRule": "owner = @request.auth.id",
-      "deleteRule": "owner = @request.auth.id",
-      "fields": [
-        {
-          "id": "text1234567890",
-          "name": "title",
-          "type": "text",
-          "system": false,
-          "required": true,
-          "unique": false,
-          "options": {
-            "min": 1,
-            "max": 100,
-            "pattern": ""
-          }
-        },
-        {
-          "id": "relation1234567",
-          "name": "owner",
-          "type": "relation",
-          "system": false,
-          "required": true,
-          "unique": false,
-          "options": {
-            "collectionId": "users",
-            "cascadeDelete": false,
-            "minSelect": null,
-            "maxSelect": 1,
-            "displayFields": ["name", "email"]
-          }
-        },
-        {
-          "id": "bool1234567890",
-          "name": "isPublished",
-          "type": "bool",
-          "system": false,
-          "required": false,
-          "options": {}
+      },
+      {
+        "system": false,
+        "id": "rel_owner",
+        "name": "owner",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "options": {
+          "collectionId": "_pb_users_auth_",
+          "maxSelect": 1,
+          "cascadeDelete": false
         }
-      ]
-    },
-    {
-      "id": "questions",
-      "name": "questions",
-      "type": "base",
-      "system": false,
-      "listRule": "quiz.isPublished = true || quiz.owner = @request.auth.id",
-      "viewRule": "quiz.isPublished = true || quiz.owner = @request.auth.id",
-      "createRule": "quiz.owner = @request.auth.id",
-      "updateRule": "quiz.owner = @request.auth.id",
-      "deleteRule": "quiz.owner = @request.auth.id",
-      "fields": [
-        {
-          "id": "relation0987654",
-          "name": "quiz",
-          "type": "relation",
-          "system": false,
-          "required": true,
-          "unique": false,
-          "options": {
-            "collectionId": "quizzes",
-            "cascadeDelete": true,
-            "minSelect": null,
-            "maxSelect": 1,
-            "displayFields": ["title"]
-          }
-        },
-        {
-          "id": "number1234567",
-          "name": "order",
-          "type": "number",
-          "system": false,
-          "required": true,
-          "options": {
-            "min": null,
-            "max": null,
-            "noDecimal": true
-          }
-        },
-        {
-          "id": "text2345678",
-          "name": "text",
-          "type": "text",
-          "system": false,
-          "required": true,
-          "options": {
-            "min": 1,
-            "max": 300,
-            "pattern": ""
-          }
-        },
-        {
-          "id": "json1234567",
-          "name": "options",
-          "type": "json",
-          "system": false,
-          "required": true,
-          "options": {}
-        },
-        {
-          "id": "number3456789",
-          "name": "correctIndex",
-          "type": "number",
-          "system": false,
-          "required": true,
-          "options": {
-            "min": 0,
-            "max": 3,
-            "noDecimal": true
-          }
-        },
-        {
-          "id": "number4567890",
-          "name": "timeLimit",
-          "type": "number",
-          "system": false,
-          "required": false,
-          "options": {
-            "min": 5,
-            "max": 300,
-            "noDecimal": true
-          }
-        },
-        {
-          "id": "file1234567",
-          "name": "image",
-          "type": "file",
-          "system": false,
-          "required": false,
-          "options": {
-            "maxSelect": 1,
-            "maxSize": 5242880,
-            "mimeTypes": ["image/jpeg", "image/png", "image/webp"],
-            "thumbs": ["100x100"]
-          }
+      },
+      {
+        "system": false,
+        "id": "bool_published",
+        "name": "isPublished",
+        "type": "bool",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "system": true,
+        "id": "autodate2990389176",
+        "name": "created",
+        "type": "autodate",
+        "required": false,
+        "presentable": false,
+        "onCreate": true,
+        "onUpdate": false
+      },
+      {
+        "system": true,
+        "id": "autodate3332085495",
+        "name": "updated",
+        "type": "autodate",
+        "required": false,
+        "presentable": false,
+        "onCreate": true,
+        "onUpdate": true
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "id": "questions",
+    "name": "questions",
+    "type": "base",
+    "system": false,
+    "listRule": "quiz.isPublished = true || quiz.owner = @request.auth.id",
+    "viewRule": "quiz.isPublished = true || quiz.owner = @request.auth.id",
+    "createRule": "quiz.owner = @request.auth.id",
+    "updateRule": "quiz.owner = @request.auth.id",
+    "deleteRule": "quiz.owner = @request.auth.id",
+    "fields": [
+      {
+        "system": true,
+        "id": "text3208210256",
+        "name": "id",
+        "type": "text",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 15,
+          "max": 15,
+          "pattern": "^[a-z0-9]+$"
         }
-      ]
-    },
-    {
-      "id": "games",
-      "name": "games",
-      "type": "base",
-      "system": false,
-      "listRule": "",
-      "viewRule": "",
-      "createRule": "@request.auth.id != \"\" && host = @request.auth.id",
-      "updateRule": "host = @request.auth.id",
-      "deleteRule": "host = @request.auth.id",
-      "fields": [
-        {
-          "id": "relation1111111",
-          "name": "quiz",
-          "type": "relation",
-          "system": false,
-          "required": true,
-          "unique": false,
-          "options": {
-            "collectionId": "quizzes",
-            "cascadeDelete": false,
-            "minSelect": null,
-            "maxSelect": 1,
-            "displayFields": ["title"]
-          }
-        },
-        {
-          "id": "relation2222222",
-          "name": "host",
-          "type": "relation",
-          "system": false,
-          "required": true,
-          "unique": false,
-          "options": {
-            "collectionId": "users",
-            "cascadeDelete": false,
-            "minSelect": null,
-            "maxSelect": 1,
-            "displayFields": ["name", "email"]
-          }
-        },
-        {
-          "id": "text3333333",
-          "name": "code",
-          "type": "text",
-          "system": false,
-          "required": true,
-          "unique": true,
-          "options": {
-            "min": 6,
-            "max": 6,
-            "pattern": ""
-          }
-        },
-        {
-          "id": "select444444",
-          "name": "status",
-          "type": "select",
-          "system": false,
-          "required": true,
-          "options": {
-            "maxSelect": 1,
-            "values": ["lobby", "question", "results", "finished"]
-          }
-        },
-        {
-          "id": "relation5555555",
-          "name": "currentQuestion",
-          "type": "relation",
-          "system": false,
-          "required": false,
-          "unique": false,
-          "options": {
-            "collectionId": "questions",
-            "cascadeDelete": false,
-            "minSelect": null,
-            "maxSelect": 1,
-            "displayFields": ["text"]
-          }
-        },
-        {
-          "id": "date666666",
-          "name": "questionStartedAt",
-          "type": "date",
-          "system": false,
-          "required": false,
-          "options": {}
+      },
+      {
+        "system": false,
+        "id": "rel_quiz",
+        "name": "quiz",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "options": {
+          "collectionId": "quizzes",
+          "maxSelect": 1,
+          "cascadeDelete": true
         }
-      ]
-    },
-    {
-      "id": "players",
-      "name": "players",
-      "type": "base",
-      "system": false,
-      "listRule": "",
-      "viewRule": "",
-      "createRule": "game.status = \"lobby\"",
-      "updateRule": "game.host = @request.auth.id",
-      "deleteRule": "game.host = @request.auth.id",
-      "fields": [
-        {
-          "id": "relation7777777",
-          "name": "game",
-          "type": "relation",
-          "system": false,
-          "required": true,
-          "unique": false,
-          "options": {
-            "collectionId": "games",
-            "cascadeDelete": true,
-            "minSelect": null,
-            "maxSelect": 1,
-            "displayFields": ["code"]
-          }
-        },
-        {
-          "id": "text8888888",
-          "name": "nickname",
-          "type": "text",
-          "system": false,
-          "required": true,
-          "unique": false,
-          "options": {
-            "min": 1,
-            "max": 20,
-            "pattern": ""
-          }
-        },
-        {
-          "id": "number9999999",
-          "name": "score",
-          "type": "number",
-          "system": false,
-          "required": false,
-          "options": {
-            "min": 0,
-            "max": null,
-            "noDecimal": true
-          }
-        },
-        {
-          "id": "relationaaaaaaa",
-          "name": "user",
-          "type": "relation",
-          "system": false,
-          "required": false,
-          "unique": false,
-          "options": {
-            "collectionId": "users",
-            "cascadeDelete": false,
-            "minSelect": null,
-            "maxSelect": 1,
-            "displayFields": ["name", "email"]
-          }
+      },
+      {
+        "system": false,
+        "id": "num_order",
+        "name": "order",
+        "type": "number",
+        "required": true,
+        "presentable": false,
+        "options": {
+          "min": null,
+          "max": null,
+          "noDecimal": true
         }
-      ]
-    },
-    {
-      "id": "answers",
-      "name": "answers",
-      "type": "base",
-      "system": false,
-      "listRule": "game.host = @request.auth.id",
-      "viewRule": "game.host = @request.auth.id",
-      "createRule": "game.status = \"question\" && player.game = game && question = game.currentQuestion",
-      "updateRule": "",
-      "deleteRule": "game.host = @request.auth.id",
-      "fields": [
-        {
-          "id": "relationbbbbbbb",
-          "name": "game",
-          "type": "relation",
-          "system": false,
-          "required": true,
-          "unique": false,
-          "options": {
-            "collectionId": "games",
-            "cascadeDelete": true,
-            "minSelect": null,
-            "maxSelect": 1,
-            "displayFields": ["code"]
-          }
-        },
-        {
-          "id": "relationccccccc",
-          "name": "player",
-          "type": "relation",
-          "system": false,
-          "required": true,
-          "unique": false,
-          "options": {
-            "collectionId": "players",
-            "cascadeDelete": true,
-            "minSelect": null,
-            "maxSelect": 1,
-            "displayFields": ["nickname"]
-          }
-        },
-        {
-          "id": "relationddddddd",
-          "name": "question",
-          "type": "relation",
-          "system": false,
-          "required": true,
-          "unique": false,
-          "options": {
-            "collectionId": "questions",
-            "cascadeDelete": false,
-            "minSelect": null,
-            "maxSelect": 1,
-            "displayFields": ["text"]
-          }
-        },
-        {
-          "id": "numbereeeeeee",
-          "name": "optionIndex",
-          "type": "number",
-          "system": false,
-          "required": true,
-          "options": {
-            "min": 0,
-            "max": 3,
-            "noDecimal": true
-          }
-        },
-        {
-          "id": "boolfffffff",
-          "name": "isCorrect",
-          "type": "bool",
-          "system": false,
-          "required": false,
-          "options": {}
-        },
-        {
-          "id": "numberggggggg",
-          "name": "points",
-          "type": "number",
-          "system": false,
-          "required": false,
-          "options": {
-            "min": 0,
-            "max": 1000,
-            "noDecimal": true
-          }
+      },
+      {
+        "system": false,
+        "id": "text_q_text",
+        "name": "text",
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "options": {
+          "min": 1,
+          "max": 300,
+          "pattern": ""
         }
-      ]
-    }
-  ],
-  "indexes": [
-    {
-      "collection": "answers",
-      "name": "idx_player_question",
-      "unique": true,
-      "fields": ["player", "question"]
-    },
-    {
-      "collection": "players",
-      "name": "idx_game_nickname",
-      "unique": true,
-      "fields": ["game", "nickname"]
-    }
-  ]
-}
+      },
+      {
+        "system": false,
+        "id": "json_options",
+        "name": "options",
+        "type": "json",
+        "required": true,
+        "presentable": false
+      },
+      {
+        "system": false,
+        "id": "num_correct",
+        "name": "correctIndex",
+        "type": "number",
+        "required": true,
+        "presentable": false,
+        "options": {
+          "min": 0,
+          "max": 3,
+          "noDecimal": true
+        }
+      },
+      {
+        "system": false,
+        "id": "num_time",
+        "name": "timeLimit",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "options": {
+          "min": 5,
+          "max": 300,
+          "noDecimal": true
+        }
+      },
+      {
+        "system": false,
+        "id": "file_image",
+        "name": "image",
+        "type": "file",
+        "required": false,
+        "presentable": false,
+        "options": {
+          "maxSelect": 1,
+          "maxSize": 5242880,
+          "mimeTypes": ["image/jpeg", "image/png", "image/webp"],
+          "thumbs": ["100x100"]
+        }
+      },
+      {
+        "system": true,
+        "id": "autodate2990389176",
+        "name": "created",
+        "type": "autodate",
+        "required": false,
+        "presentable": false,
+        "onCreate": true,
+        "onUpdate": false
+      },
+      {
+        "system": true,
+        "id": "autodate3332085495",
+        "name": "updated",
+        "type": "autodate",
+        "required": false,
+        "presentable": false,
+        "onCreate": true,
+        "onUpdate": true
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "id": "games",
+    "name": "games",
+    "type": "base",
+    "system": false,
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "@request.auth.id != \"\" && host = @request.auth.id",
+    "updateRule": "host = @request.auth.id",
+    "deleteRule": "host = @request.auth.id",
+    "fields": [
+      {
+        "system": true,
+        "id": "text3208210256",
+        "name": "id",
+        "type": "text",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 15,
+          "max": 15,
+          "pattern": "^[a-z0-9]+$"
+        }
+      },
+      {
+        "system": false,
+        "id": "rel_quiz",
+        "name": "quiz",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "options": {
+          "collectionId": "quizzes",
+          "maxSelect": 1,
+          "cascadeDelete": false
+        }
+      },
+      {
+        "system": false,
+        "id": "rel_host",
+        "name": "host",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "options": {
+          "collectionId": "_pb_users_auth_",
+          "maxSelect": 1,
+          "cascadeDelete": false
+        }
+      },
+      {
+        "system": false,
+        "id": "text_code",
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "unique": true,
+        "options": {
+          "min": 6,
+          "max": 6,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "select_status",
+        "name": "status",
+        "type": "select",
+        "required": true,
+        "presentable": false,
+        "options": {
+          "maxSelect": 1,
+          "values": ["lobby", "question", "results", "finished"]
+        }
+      },
+      {
+        "system": false,
+        "id": "rel_current_q",
+        "name": "currentQuestion",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
+        "options": {
+          "collectionId": "questions",
+          "maxSelect": 1,
+          "cascadeDelete": false
+        }
+      },
+      {
+        "system": false,
+        "id": "date_started",
+        "name": "questionStartedAt",
+        "type": "date",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "system": true,
+        "id": "autodate2990389176",
+        "name": "created",
+        "type": "autodate",
+        "required": false,
+        "presentable": false,
+        "onCreate": true,
+        "onUpdate": false
+      },
+      {
+        "system": true,
+        "id": "autodate3332085495",
+        "name": "updated",
+        "type": "autodate",
+        "required": false,
+        "presentable": false,
+        "onCreate": true,
+        "onUpdate": true
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "id": "players",
+    "name": "players",
+    "type": "base",
+    "system": false,
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "game.status = \"lobby\"",
+    "updateRule": "game.host = @request.auth.id",
+    "deleteRule": "game.host = @request.auth.id",
+    "fields": [
+      {
+        "system": true,
+        "id": "text3208210256",
+        "name": "id",
+        "type": "text",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 15,
+          "max": 15,
+          "pattern": "^[a-z0-9]+$"
+        }
+      },
+      {
+        "system": false,
+        "id": "rel_game",
+        "name": "game",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "options": {
+          "collectionId": "games",
+          "maxSelect": 1,
+          "cascadeDelete": true
+        }
+      },
+      {
+        "system": false,
+        "id": "text_nickname",
+        "name": "nickname",
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "options": {
+          "min": 1,
+          "max": 20,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "num_score",
+        "name": "score",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "options": {
+          "min": 0,
+          "max": null,
+          "noDecimal": true
+        }
+      },
+      {
+        "system": false,
+        "id": "rel_user",
+        "name": "user",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
+        "options": {
+          "collectionId": "_pb_users_auth_",
+          "maxSelect": 1,
+          "cascadeDelete": false
+        }
+      },
+      {
+        "system": true,
+        "id": "autodate2990389176",
+        "name": "created",
+        "type": "autodate",
+        "required": false,
+        "presentable": false,
+        "onCreate": true,
+        "onUpdate": false
+      },
+      {
+        "system": true,
+        "id": "autodate3332085495",
+        "name": "updated",
+        "type": "autodate",
+        "required": false,
+        "presentable": false,
+        "onCreate": true,
+        "onUpdate": true
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "id": "answers",
+    "name": "answers",
+    "type": "base",
+    "system": false,
+    "listRule": "game.host = @request.auth.id",
+    "viewRule": "game.host = @request.auth.id",
+    "createRule": "game.status = \"question\" && player.game = game && question = game.currentQuestion",
+    "updateRule": "",
+    "deleteRule": "game.host = @request.auth.id",
+    "fields": [
+      {
+        "system": true,
+        "id": "text3208210256",
+        "name": "id",
+        "type": "text",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 15,
+          "max": 15,
+          "pattern": "^[a-z0-9]+$"
+        }
+      },
+      {
+        "system": false,
+        "id": "rel_game",
+        "name": "game",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "options": {
+          "collectionId": "games",
+          "maxSelect": 1,
+          "cascadeDelete": true
+        }
+      },
+      {
+        "system": false,
+        "id": "rel_player",
+        "name": "player",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "options": {
+          "collectionId": "players",
+          "maxSelect": 1,
+          "cascadeDelete": true
+        }
+      },
+      {
+        "system": false,
+        "id": "rel_question",
+        "name": "question",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "options": {
+          "collectionId": "questions",
+          "maxSelect": 1,
+          "cascadeDelete": false
+        }
+      },
+      {
+        "system": false,
+        "id": "num_option",
+        "name": "optionIndex",
+        "type": "number",
+        "required": true,
+        "presentable": false,
+        "options": {
+          "min": 0,
+          "max": 3,
+          "noDecimal": true
+        }
+      },
+      {
+        "system": false,
+        "id": "bool_correct",
+        "name": "isCorrect",
+        "type": "bool",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "system": false,
+        "id": "num_points",
+        "name": "points",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "options": {
+          "min": 0,
+          "max": 1000,
+          "noDecimal": true
+        }
+      },
+      {
+        "system": true,
+        "id": "autodate2990389176",
+        "name": "created",
+        "type": "autodate",
+        "required": false,
+        "presentable": false,
+        "onCreate": true,
+        "onUpdate": false
+      },
+      {
+        "system": true,
+        "id": "autodate3332085495",
+        "name": "updated",
+        "type": "autodate",
+        "required": false,
+        "presentable": false,
+        "onCreate": true,
+        "onUpdate": true
+      }
+    ],
+    "indexes": []
+  }
+]
