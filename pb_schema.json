@@ -1,6 +1,6 @@
 [
   {
-    "id": "quizzes",
+    "id": "pbc_quizzes",
     "name": "quizzes",
     "type": "base",
     "system": false,
@@ -17,26 +17,21 @@
         "type": "text",
         "required": true,
         "presentable": false,
-        "unique": false,
-        "options": {
-          "min": 15,
-          "max": 15,
-          "pattern": "^[a-z0-9]+$"
-        }
+        "autogeneratePattern": "[a-z0-9]{15}",
+        "min": 15,
+        "max": 15,
+        "pattern": "^[a-z0-9]+$",
+        "primaryKey": true
       },
       {
         "system": false,
-        "id": "text1234567890",
+        "id": "text_title",
         "name": "title",
         "type": "text",
         "required": true,
         "presentable": true,
-        "unique": false,
-        "options": {
-          "min": 1,
-          "max": 100,
-          "pattern": ""
-        }
+        "min": 1,
+        "max": 100
       },
       {
         "system": false,
@@ -45,11 +40,10 @@
         "type": "relation",
         "required": true,
         "presentable": false,
-        "options": {
-          "collectionId": "_pb_users_auth_",
-          "maxSelect": 1,
-          "cascadeDelete": false
-        }
+        "collectionId": "_pb_users_auth_",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "cascadeDelete": false
       },
       {
         "system": false,
@@ -60,7 +54,7 @@
         "presentable": false
       },
       {
-        "system": true,
+        "system": false,
         "id": "autodate2990389176",
         "name": "created",
         "type": "autodate",
@@ -70,7 +64,7 @@
         "onUpdate": false
       },
       {
-        "system": true,
+        "system": false,
         "id": "autodate3332085495",
         "name": "updated",
         "type": "autodate",
@@ -83,7 +77,7 @@
     "indexes": []
   },
   {
-    "id": "questions",
+    "id": "pbc_questions",
     "name": "questions",
     "type": "base",
     "system": false,
@@ -100,12 +94,11 @@
         "type": "text",
         "required": true,
         "presentable": false,
-        "unique": false,
-        "options": {
-          "min": 15,
-          "max": 15,
-          "pattern": "^[a-z0-9]+$"
-        }
+        "autogeneratePattern": "[a-z0-9]{15}",
+        "min": 15,
+        "max": 15,
+        "pattern": "^[a-z0-9]+$",
+        "primaryKey": true
       },
       {
         "system": false,
@@ -114,11 +107,10 @@
         "type": "relation",
         "required": true,
         "presentable": false,
-        "options": {
-          "collectionId": "quizzes",
-          "maxSelect": 1,
-          "cascadeDelete": true
-        }
+        "collectionId": "pbc_quizzes",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "cascadeDelete": true
       },
       {
         "system": false,
@@ -127,24 +119,18 @@
         "type": "number",
         "required": true,
         "presentable": false,
-        "options": {
-          "min": null,
-          "max": null,
-          "noDecimal": true
-        }
+        "onlyInt": true,
+        "min": 0
       },
       {
         "system": false,
-        "id": "text_q_text",
+        "id": "text_question",
         "name": "text",
         "type": "text",
         "required": true,
         "presentable": true,
-        "options": {
-          "min": 1,
-          "max": 300,
-          "pattern": ""
-        }
+        "min": 1,
+        "max": 300
       },
       {
         "system": false,
@@ -159,13 +145,11 @@
         "id": "num_correct",
         "name": "correctIndex",
         "type": "number",
-        "required": true,
+        "required": false,
         "presentable": false,
-        "options": {
-          "min": 0,
-          "max": 3,
-          "noDecimal": true
-        }
+        "onlyInt": true,
+        "min": 0,
+        "max": 3
       },
       {
         "system": false,
@@ -174,28 +158,12 @@
         "type": "number",
         "required": false,
         "presentable": false,
-        "options": {
-          "min": 5,
-          "max": 300,
-          "noDecimal": true
-        }
+        "onlyInt": true,
+        "min": 5,
+        "max": 300
       },
       {
         "system": false,
-        "id": "file_image",
-        "name": "image",
-        "type": "file",
-        "required": false,
-        "presentable": false,
-        "options": {
-          "maxSelect": 1,
-          "maxSize": 5242880,
-          "mimeTypes": ["image/jpeg", "image/png", "image/webp"],
-          "thumbs": ["100x100"]
-        }
-      },
-      {
-        "system": true,
         "id": "autodate2990389176",
         "name": "created",
         "type": "autodate",
@@ -205,7 +173,7 @@
         "onUpdate": false
       },
       {
-        "system": true,
+        "system": false,
         "id": "autodate3332085495",
         "name": "updated",
         "type": "autodate",
@@ -218,7 +186,7 @@
     "indexes": []
   },
   {
-    "id": "games",
+    "id": "pbc_games",
     "name": "games",
     "type": "base",
     "system": false,
@@ -235,12 +203,11 @@
         "type": "text",
         "required": true,
         "presentable": false,
-        "unique": false,
-        "options": {
-          "min": 15,
-          "max": 15,
-          "pattern": "^[a-z0-9]+$"
-        }
+        "autogeneratePattern": "[a-z0-9]{15}",
+        "min": 15,
+        "max": 15,
+        "pattern": "^[a-z0-9]+$",
+        "primaryKey": true
       },
       {
         "system": false,
@@ -249,11 +216,10 @@
         "type": "relation",
         "required": true,
         "presentable": false,
-        "options": {
-          "collectionId": "quizzes",
-          "maxSelect": 1,
-          "cascadeDelete": false
-        }
+        "collectionId": "pbc_quizzes",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "cascadeDelete": false
       },
       {
         "system": false,
@@ -262,11 +228,10 @@
         "type": "relation",
         "required": true,
         "presentable": false,
-        "options": {
-          "collectionId": "_pb_users_auth_",
-          "maxSelect": 1,
-          "cascadeDelete": false
-        }
+        "collectionId": "_pb_users_auth_",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "cascadeDelete": false
       },
       {
         "system": false,
@@ -275,12 +240,8 @@
         "type": "text",
         "required": true,
         "presentable": true,
-        "unique": true,
-        "options": {
-          "min": 6,
-          "max": 6,
-          "pattern": ""
-        }
+        "min": 6,
+        "max": 6
       },
       {
         "system": false,
@@ -289,10 +250,13 @@
         "type": "select",
         "required": true,
         "presentable": false,
-        "options": {
-          "maxSelect": 1,
-          "values": ["lobby", "question", "results", "finished"]
-        }
+        "values": [
+          "lobby",
+          "question",
+          "results",
+          "finished"
+        ],
+        "maxSelect": 1
       },
       {
         "system": false,
@@ -301,11 +265,10 @@
         "type": "relation",
         "required": false,
         "presentable": false,
-        "options": {
-          "collectionId": "questions",
-          "maxSelect": 1,
-          "cascadeDelete": false
-        }
+        "collectionId": "pbc_questions",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "cascadeDelete": false
       },
       {
         "system": false,
@@ -316,7 +279,7 @@
         "presentable": false
       },
       {
-        "system": true,
+        "system": false,
         "id": "autodate2990389176",
         "name": "created",
         "type": "autodate",
@@ -326,7 +289,7 @@
         "onUpdate": false
       },
       {
-        "system": true,
+        "system": false,
         "id": "autodate3332085495",
         "name": "updated",
         "type": "autodate",
@@ -336,10 +299,12 @@
         "onUpdate": true
       }
     ],
-    "indexes": []
+    "indexes": [
+      "CREATE UNIQUE INDEX idx_quiz_game_code ON games (code)"
+    ]
   },
   {
-    "id": "players",
+    "id": "pbc_players",
     "name": "players",
     "type": "base",
     "system": false,
@@ -356,12 +321,11 @@
         "type": "text",
         "required": true,
         "presentable": false,
-        "unique": false,
-        "options": {
-          "min": 15,
-          "max": 15,
-          "pattern": "^[a-z0-9]+$"
-        }
+        "autogeneratePattern": "[a-z0-9]{15}",
+        "min": 15,
+        "max": 15,
+        "pattern": "^[a-z0-9]+$",
+        "primaryKey": true
       },
       {
         "system": false,
@@ -370,11 +334,10 @@
         "type": "relation",
         "required": true,
         "presentable": false,
-        "options": {
-          "collectionId": "games",
-          "maxSelect": 1,
-          "cascadeDelete": true
-        }
+        "collectionId": "pbc_games",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "cascadeDelete": true
       },
       {
         "system": false,
@@ -383,11 +346,8 @@
         "type": "text",
         "required": true,
         "presentable": true,
-        "options": {
-          "min": 1,
-          "max": 20,
-          "pattern": ""
-        }
+        "min": 1,
+        "max": 20
       },
       {
         "system": false,
@@ -396,11 +356,8 @@
         "type": "number",
         "required": false,
         "presentable": false,
-        "options": {
-          "min": 0,
-          "max": null,
-          "noDecimal": true
-        }
+        "onlyInt": true,
+        "min": 0
       },
       {
         "system": false,
@@ -409,14 +366,13 @@
         "type": "relation",
         "required": false,
         "presentable": false,
-        "options": {
-          "collectionId": "_pb_users_auth_",
-          "maxSelect": 1,
-          "cascadeDelete": false
-        }
+        "collectionId": "_pb_users_auth_",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "cascadeDelete": false
       },
       {
-        "system": true,
+        "system": false,
         "id": "autodate2990389176",
         "name": "created",
         "type": "autodate",
@@ -426,7 +382,7 @@
         "onUpdate": false
       },
       {
-        "system": true,
+        "system": false,
         "id": "autodate3332085495",
         "name": "updated",
         "type": "autodate",
@@ -436,17 +392,19 @@
         "onUpdate": true
       }
     ],
-    "indexes": []
+    "indexes": [
+      "CREATE UNIQUE INDEX idx_quiz_player_nickname ON players (game, nickname)"
+    ]
   },
   {
-    "id": "answers",
+    "id": "pbc_answers",
     "name": "answers",
     "type": "base",
     "system": false,
     "listRule": "game.host = @request.auth.id",
     "viewRule": "game.host = @request.auth.id",
     "createRule": "game.status = \"question\" && player.game = game && question = game.currentQuestion",
-    "updateRule": "",
+    "updateRule": null,
     "deleteRule": "game.host = @request.auth.id",
     "fields": [
       {
@@ -456,12 +414,11 @@
         "type": "text",
         "required": true,
         "presentable": false,
-        "unique": false,
-        "options": {
-          "min": 15,
-          "max": 15,
-          "pattern": "^[a-z0-9]+$"
-        }
+        "autogeneratePattern": "[a-z0-9]{15}",
+        "min": 15,
+        "max": 15,
+        "pattern": "^[a-z0-9]+$",
+        "primaryKey": true
       },
       {
         "system": false,
@@ -470,11 +427,10 @@
         "type": "relation",
         "required": true,
         "presentable": false,
-        "options": {
-          "collectionId": "games",
-          "maxSelect": 1,
-          "cascadeDelete": true
-        }
+        "collectionId": "pbc_games",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "cascadeDelete": true
       },
       {
         "system": false,
@@ -483,11 +439,10 @@
         "type": "relation",
         "required": true,
         "presentable": false,
-        "options": {
-          "collectionId": "players",
-          "maxSelect": 1,
-          "cascadeDelete": true
-        }
+        "collectionId": "pbc_players",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "cascadeDelete": true
       },
       {
         "system": false,
@@ -496,24 +451,21 @@
         "type": "relation",
         "required": true,
         "presentable": false,
-        "options": {
-          "collectionId": "questions",
-          "maxSelect": 1,
-          "cascadeDelete": false
-        }
+        "collectionId": "pbc_questions",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "cascadeDelete": false
       },
       {
         "system": false,
         "id": "num_option",
         "name": "optionIndex",
         "type": "number",
-        "required": true,
+        "required": false,
         "presentable": false,
-        "options": {
-          "min": 0,
-          "max": 3,
-          "noDecimal": true
-        }
+        "onlyInt": true,
+        "min": 0,
+        "max": 3
       },
       {
         "system": false,
@@ -530,14 +482,12 @@
         "type": "number",
         "required": false,
         "presentable": false,
-        "options": {
-          "min": 0,
-          "max": 1000,
-          "noDecimal": true
-        }
+        "onlyInt": true,
+        "min": 0,
+        "max": 1000
       },
       {
-        "system": true,
+        "system": false,
         "id": "autodate2990389176",
         "name": "created",
         "type": "autodate",
@@ -547,7 +497,7 @@
         "onUpdate": false
       },
       {
-        "system": true,
+        "system": false,
         "id": "autodate3332085495",
         "name": "updated",
         "type": "autodate",
@@ -557,6 +507,8 @@
         "onUpdate": true
       }
     ],
-    "indexes": []
+    "indexes": [
+      "CREATE UNIQUE INDEX idx_quiz_answer_once ON answers (player, question)"
+    ]
   }
 ]
