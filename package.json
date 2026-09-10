@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "test": "node --test src/lib/quizValidation.test.js src/pages/HostPage.test.js",
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
@@ -17,10 +18,13 @@
     "react-router-dom": "^6.20.0"
   },
   "devDependencies": {
+    "@babel/core": "^8.0.1",
+    "@babel/plugin-transform-react-jsx": "^8.0.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
     "autoprefixer": "^10.5.5",
+    "jsdom": "^29.1.1",
     "oxlint": "^1.79.0",
     "postcss": "^8.5.28",
     "tailwindcss": "^4.3.3",
