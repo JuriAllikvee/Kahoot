@@ -399,6 +399,18 @@
       },
       {
         "system": false,
+        "id": "text_capability",
+        "name": "capabilityHash",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "hidden": true,
+        "min": 64,
+        "max": 64,
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      {
+        "system": false,
         "id": "autodate2990389176",
         "name": "created",
         "type": "autodate",
