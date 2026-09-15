@@ -1,3 +1,4 @@
+import { sha256 } from '@noble/hashes/sha2.js';
 import { validatePublication, validateQuestion } from './quizValidation.js';
 
 // Versioned identity: renaming a saved quiz must not create another copy.
@@ -24,8 +25,8 @@ const pendingTitle = '[Preparing] ' + READY_MADE_QUIZ.title;
 
 async function recordId(owner, slot) {
   const bytes = new TextEncoder().encode(JSON.stringify([owner, READY_MADE_QUIZ.version, slot]));
-  const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
-  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('').slice(0, 15);
+  const digest = sha256(bytes);
+  return Array.from(digest, byte => byte.toString(16).padStart(2, '0')).join('').slice(0, 15);
 }
 
 async function readOrCreate(collection, data) {

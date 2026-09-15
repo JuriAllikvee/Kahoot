@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageShell from './PageShell';
+import { joinLobby } from '../lib/lobby.js';
 import { pb } from '../lib/pocketbase';
 
 export default function JoinGame({ onJoin }) {
@@ -15,30 +16,8 @@ export default function JoinGame({ onJoin }) {
     setError('');
 
     try {
-      // Find game by code
-      const games = await pb.collection('games').getList(1, 1, {
-        filter: `code = "${code.toUpperCase()}"`,
-      });
-
-      if (games.items.length === 0) {
-        setError('Invalid game code');
-        setLoading(false);
-        return;
-      }
-
-      const game = games.items[0];
-
-      // Create player
-      const player = await pb.collection('players').create({
-        game: game.id,
-        nickname: nickname.trim(),
-      });
-
-      // Store player ID in localStorage
-      localStorage.setItem('playerId', player.id);
-      localStorage.setItem('gameId', game.id);
-
-      onJoin(game.id, player.id);
+      const session = await joinLobby(pb, code, nickname);
+      onJoin(session.gameId, session.playerId);
     } catch (err) {
       setError(err?.response?.data?.message || err.message);
     } finally {

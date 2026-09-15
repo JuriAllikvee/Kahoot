@@ -7,19 +7,20 @@ import React, { act } from 'react';
 
 
 // Explicit local fake: no requests or writes to a real PocketBase server.
-const records = { quizzes: [], questions: [] };
+const records = { quizzes: [], questions: [], games: [], players: [] };
 const calls = [];
 let sequence = 0;
 const pb = {
   filter: (expression, values) => JSON.stringify({ expression, values }),
   collection: name => ({
+    async subscribe() { return () => {}; },
     async getFullList(params) {
       calls.push([name, 'list', params]);
       const { values } = JSON.parse(params.filter);
-      return structuredClone(records[name].filter(row => name === 'quizzes' ? row.owner === values.owner : row.quiz === values.quiz));
+      return structuredClone(records[name].filter(row => name === 'quizzes' ? row.owner === values.owner : name === 'players' ? row.game === values.game : row.quiz === values.quiz));
     },
     async getOne(id) { const row = records[name].find(row => row.id === id); if (!row) throw Object.assign(new Error('Not found'), { status: 404 }); return structuredClone(row); },
-    async create(data) { const row = { ...data, id: data.id || String(++sequence) }; if (records[name].some(item => item.id === row.id)) throw Object.assign(new Error('Duplicate'), { status: 400 }); records[name].push(row); return structuredClone(row); },
+    async create(data) { const row = { ...data, id: data.id || String(++sequence) }; if (records[name].some(item => item.id === row.id)) throw Object.assign(new Error('Duplicate'), { status: 400 }); if (name === 'games') { assert.equal('code' in data, false); row.code = 'SERVER'; } records[name].push(row); return structuredClone(row); },
     async update(id, data) { const row = records[name].find(row => row.id === id); Object.assign(row, data); return structuredClone(row); },
     async delete(id) { records[name] = records[name].filter(row => row.id !== id); return true; },
   }),
@@ -29,11 +30,12 @@ globalThis.window = dom.window;
 globalThis.document = dom.window.document;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 window.confirm = () => true;
-globalThis.__hostTest = { React, pb, useAuth: () => ({ user: { id: 'owner', name: 'Test host' }, isValid: true, loading: false, logout() {} }) };
+globalThis.__hostTest = { React, pb, records, useAuth: () => ({ user: { id: 'owner', name: 'Test host' }, isValid: true, loading: false, logout() {} }) };
 let source = await readFile(new URL('./HostPage.jsx', import.meta.url), 'utf8');
 source = source.replace(/import .* from ['"](.*?)['"];?/g, (line, path) => {
   if (path.includes('AuthContext')) return 'const { useAuth } = globalThis.__hostTest;';
   if (path.includes('AuthModal')) return 'const AuthModal = () => null;';
+  if (path.includes('LobbyPanel')) return 'const LobbyPanel = ({gameId}) => React.createElement("p", null, globalThis.__hostTest.records.games.find(g => g.id === gameId)?.code);';
   if (path.includes('PageShell')) return 'const PageShell = ({children}) => children;';
   if (path.includes('pocketbase')) return 'const { pb } = globalThis.__hostTest;';
   if (path === 'react') return line.replace("'react'", JSON.stringify(import.meta.resolve('react')));
@@ -106,6 +108,9 @@ test('host can create, edit, reorder, publish, unpublish and delete questions us
   await click('Publish quiz');
   assert.equal(records.quizzes.at(-1).isPublished, true);
   assert.ok(button('Unpublish quiz'));
+  await click('Create lobby');
+  assert.equal(records.games.at(-1).quiz, records.quizzes.at(-1).id);
+  assert.match(document.body.textContent, /SERVER/);
   await click('Unpublish quiz');
   await click('Delete question');
   assert.equal(records.questions.length, 1);

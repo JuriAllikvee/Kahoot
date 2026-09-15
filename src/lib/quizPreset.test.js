@@ -4,6 +4,20 @@ import { validatePublication } from './quizValidation.js';
 
 const load = () => import('./quizPreset.js');
 
+test('HTTP without subtle preserves every previous SHA256 deterministic ID', async () => {
+  const { createHash } = await import('node:crypto');
+  const { saveReadyMadeQuiz, READY_MADE_QUIZ } = await load();
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'crypto');
+  Object.defineProperty(globalThis, 'crypto', { configurable: true, value: {} });
+  try {
+    const pb = fakePocketBase();
+    const quiz = await saveReadyMadeQuiz(pb, 'хост');
+    const expected = slot => createHash('sha256').update(JSON.stringify(['хост', READY_MADE_QUIZ.version, slot])).digest('hex').slice(0, 15);
+    assert.equal(quiz.id, expected('quiz'));
+    for (const q of pb.records.questions.values()) assert.equal(q.id, expected(`question-${q.order}`));
+  } finally { Object.defineProperty(globalThis, 'crypto', descriptor); }
+});
+
 // Local record store only; models uniqueness, missing records and readback failures.
 function fakePocketBase() {
   const records = { quizzes: new Map(), questions: new Map() };

@@ -64,7 +64,10 @@ services:
 5. **Environment**: Добавьте `VITE_POCKETBASE_URL` с адресом вашего PocketBase
 6. **Click Deploy** — Coolify запустит конвейер
 
-### What Each Command Does
+### Backend hook installation (required for lobbies)
+
+The static React deployment does not run PocketBase hooks. Copy `pb_hooks/main.pb.js` into the `pb_hooks/` directory of the PocketBase server (or mount this repository directory at `/pb/pb_hooks`), then restart PocketBase. The hook generates the six-character lobby code on the server and blocks unsupported game/answer mutations. Do not generate or accept a game code from the browser. Verify the backend hook is active before inviting players.
+
 
 ```bash
 npm install

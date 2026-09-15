@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from '../components/AuthModal';
 import PageShell from '../components/PageShell';
+import LobbyPanel from '../components/LobbyPanel';
+import { createLobby } from '../lib/lobby.js';
 import { saveReadyMadeQuiz } from '../lib/quizPreset.js';
 import { pb } from '../lib/pocketbase';
 import { formatQuizError, validatePublication, validateQuestion, validateTitle } from '../lib/quizValidation.js';
@@ -14,6 +16,7 @@ export default function HostPage() {
 }
 
 function HostWorkspace({ user, logout }) {
+  const [lobby, setLobby] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
   const [selected, setSelected] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -162,8 +165,9 @@ function HostWorkspace({ user, logout }) {
       <div className="page-heading"><div><p className="eyebrow">HOST SPACE</p><h1>Your quizzes</h1><p>Create questions, choose the answers, and publish when ready.</p></div><span className="account-label">{user.name || user.email}</span></div>
       {error && <div className="error-message" role="alert">{error}</div>}
       <p className="host-notice" role="status">{busy ? 'Saving or loading…' : notice}</p>
+      {lobby && <LobbyPanel key={lobby.id} gameId={lobby.id} />}
       <section className="host-create" aria-label="Ready-made quiz">
-        <div><h2>Ready-made quiz</h2><p className="field-help">10 questions in Russian: general knowledge and IT. Saved once to your account; use this button again to reopen it. Your edits are kept.</p><p className="field-help">If saving is interrupted, retry this button to resume. Live games are not available yet.</p></div>
+        <div><h2>Ready-made quiz</h2><p className="field-help">10 questions in Russian: general knowledge and IT. Saved once to your account; use this button again to reopen it. Your edits are kept.</p><p className="field-help">If saving is interrupted, retry this button to resume. Lobbies are available after publishing; questions and scoring are not available yet.</p></div>
         <button className="button secondary" disabled={disabled || !!draft || (!!selected && title !== selected.title)} onClick={() => run(async () => {
           try {
             const quiz = await saveReadyMadeQuiz(pb, user.id);
@@ -188,7 +192,7 @@ function HostWorkspace({ user, logout }) {
             <button className="button secondary" disabled={readOnly || !!draft}>Save title</button>
           </form>
           <div className="host-actions"><button className="button secondary" disabled={disabled || !!draft || title !== selected.title} onClick={togglePublish}>{selected.isPublished ? 'Unpublish quiz' : 'Publish quiz'}</button><span className="field-help">{selected.isPublished ? 'Unpublish to change questions or title.' : 'Save title and question changes before publishing.'}</span></div>
-          <p className="field-help">Publishing makes this quiz visible. Live games are not implemented yet.</p>
+          <div className="host-actions"><button className="button primary" disabled={disabled || !!draft || !selected.isPublished || lobby?.quiz === selected.id} onClick={() => run(async () => setLobby(await createLobby(pb, selected.id, user.id)))}>Create lobby</button><p className="field-help">Publish this quiz to invite players. The game code is assigned by the server.</p></div>
           <div className="host-section-heading"><h2>Questions ({questions.length})</h2><button className="button secondary compact" disabled={readOnly || !!draft} onClick={() => editQuestion(null)}>Add question</button></div>
           {!questions.length && <p className="field-help">Add at least one complete question before publishing.</p>}
           <ol className="question-list">{questions.map((question, index) => <li key={question.id}>

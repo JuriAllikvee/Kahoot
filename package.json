@@ -4,13 +4,14 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test": "node --test src/lib/quizValidation.test.js src/lib/quizPreset.test.js src/pages/HostPage.test.js",
+    "test": "node --test src/lib/*.test.js src/pages/HostPage.test.js",
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@noble/hashes": "^2.4.0",
     "@tailwindcss/vite": "^4.3.3",
     "pocketbase": "^0.28.1",
     "react": "^19.2.8",
