@@ -24,7 +24,17 @@ export default function PlayPage() {
     let active = true;
     setVerified(false); setError('');
     restoreSession(pb, session).then(() => { if (active) setVerified(true); })
-      .catch(err => { if (active) setError(`Unable to restore this session. ${err.message}`); });
+      .catch(err => {
+        if (active) {
+          const message = err.message || '';
+          // Auto-clear old sessions missing the token field
+          if (message.includes('Invalid or old saved session') || message.includes('invalid player session')) {
+            clearSession();
+          } else {
+            setError(`Unable to restore this session. ${message}`);
+          }
+        }
+      });
     return () => { active = false; };
   }, [session, attempt]);
   function joined(next) {
