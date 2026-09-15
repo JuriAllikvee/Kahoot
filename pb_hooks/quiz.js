@@ -97,6 +97,9 @@ function answer(app,game,body,auth) {
   const a=new Record(app.findCollectionByNameOrId('answers'));
   a.set('game',game.id);a.set('player',player.id);a.set('question',q.id);a.set('optionIndex',body.optionIndex);
   a.set('isCorrect',correct);a.set('points',correct ? Math.min(1000,500+Math.floor(500*remaining/(q.timeLimit*1000))) : 0);app.save(a);
-  return {accepted:true};
+  // Auto-advance once every joined player has answered, instead of waiting out the timer.
+  const total=rows(app,'answers','game = {:g} && question = {:q}',{g:game.id,q:q.id}).length;
+  if (total>=rows(app,'players','game = {:g}',{g:game.id}).length) finishQuestion(app,game);
+  return {accepted:true,finished:game.getString('status')!=='question'};
 }
 module.exports = {join,state,control,answer,expire};
