@@ -117,7 +117,7 @@ function HostWorkspace({ user, logout }) {
       await pb.collection('quizzes').update(quiz.id, { isPublished: published });
       const result = await reloadQuiz(quiz.id);
       if (result.quiz.isPublished !== published) throw new Error('Publication status could not be verified. Reload before retrying.');
-    }, selected.isPublished ? 'Quiz unpublished.' : 'Quiz published. Live gameplay is not available yet.');
+    }, selected.isPublished ? 'Quiz unpublished.' : 'Quiz published. Create a lobby to play.');
   }
 
   function deleteQuestion(question) {
@@ -165,9 +165,9 @@ function HostWorkspace({ user, logout }) {
       <div className="page-heading"><div><p className="eyebrow">HOST SPACE</p><h1>Your quizzes</h1><p>Create questions, choose the answers, and publish when ready.</p></div><span className="account-label">{user.name || user.email}</span></div>
       {error && <div className="error-message" role="alert">{error}</div>}
       <p className="host-notice" role="status">{busy ? 'Saving or loading…' : notice}</p>
-      {lobby && <LobbyPanel key={lobby.id} gameId={lobby.id} />}
+      {lobby && <LobbyPanel key={lobby.id} gameId={lobby.id} onReplay={() => run(async () => setLobby(await createLobby(pb, lobby.quiz, user.id)))} />}
       <section className="host-create" aria-label="Ready-made quiz">
-        <div><h2>Ready-made quiz</h2><p className="field-help">10 questions in Russian: general knowledge and IT. Saved once to your account; use this button again to reopen it. Your edits are kept.</p><p className="field-help">If saving is interrupted, retry this button to resume. Lobbies are available after publishing; questions and scoring are not available yet.</p></div>
+        <div><h2>Ready-made quiz</h2><p className="field-help">10 questions in Russian: general knowledge and IT. Saved once to your account; use this button again to reopen it. Your edits are kept.</p><p className="field-help">If saving is interrupted, retry this button to resume. Publish, create a lobby, then start the game. Replay creates a new lobby using the same quiz.</p></div>
         <button className="button secondary" disabled={disabled || !!draft || (!!selected && title !== selected.title)} onClick={() => run(async () => {
           try {
             const quiz = await saveReadyMadeQuiz(pb, user.id);

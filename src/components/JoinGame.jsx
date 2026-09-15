@@ -17,7 +17,7 @@ export default function JoinGame({ onJoin }) {
 
     try {
       const session = await joinLobby(pb, code, nickname);
-      onJoin(session.gameId, session.playerId);
+      onJoin(session);
     } catch (err) {
       setError(err?.response?.data?.message || err.message);
     } finally {

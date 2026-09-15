@@ -37,20 +37,14 @@ export async function joinLobby(pb, rawCode, rawNickname) {
   });
   const game = result.items[0];
   if (!game || game.status !== 'lobby') throw new Error('No open lobby found for this code.');
-  const created = await pb.collection('players').create({ game: game.id, nickname });
-  const session = { gameId: game.id, playerId: created.id };
+  const session = await pb.send(`/api/quiz/${game.id}/join`, { method: 'POST', body: { nickname } });
   await restoreSession(pb, session);
   return session;
 }
 
 export async function restoreSession(pb, session) {
-  if (!session?.gameId || !session?.playerId) throw new Error('Invalid saved session.');
-  const [game, player] = await Promise.all([
-    pb.collection('games').getOne(session.gameId, { requestKey: null }),
-    pb.collection('players').getOne(session.playerId, { requestKey: null }),
-  ]);
-  if (player.game !== game.id) throw new Error('This player session no longer belongs to this game.');
-  return { game, player };
+  if (!session?.gameId || !session?.playerId || !session?.token) throw new Error('Invalid or old saved session. Clear it and rejoin.');
+  return pb.send(`/api/quiz/${session.gameId}/state`, { method: 'POST', body: { playerId: session.playerId, token: session.token }, requestKey: null });
 }
 
 export async function createLobby(pb, quizId, host) {

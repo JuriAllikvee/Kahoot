@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 const hooks = {};
 vm.runInNewContext(readFileSync('pb_hooks/main.pb.js', 'utf8'), {
   onRecordCreateRequest: (fn, name) => { hooks[`create:${name}`] = fn; },
+  routerAdd() {}, cronAdd() {}, onRecordDeleteRequest() {},
   onRecordUpdateRequest: (fn, name) => { hooks[`update:${name}`] = fn; },
   BadRequestError: Error, ForbiddenError: Error,
   $security: { randomStringWithAlphabet: (length, alphabet) => { assert.equal(length, 6); assert.match(alphabet, /A.*Z/); return 'ABC123'; } },
@@ -24,7 +25,7 @@ test('modern game hook replaces client code, enforces ownership and calls next',
   event.auth = { id: 'h' }; event.app.findRecordsByFilter = () => [{}];
   assert.throws(() => hooks['create:games'](event), /code/i);
 });
-test('answer creation and updates are explicitly disabled', () => {
+test('generic answer writes are blocked in favor of capability routes', () => {
   assert.throws(() => hooks['create:answers']({}), /not supported/i);
   assert.throws(() => hooks['update:answers']({}), /not supported/i);
 });

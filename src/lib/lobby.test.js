@@ -8,13 +8,19 @@ test('join validates input, verifies the player and restores a saved session', a
   let payload;
   const pb = { filter: (f, p) => { assert.equal(p.code, 'ABC123'); return f; }, collection: name => name === 'games' ? {
     getList: async () => ({ items: [game] }), getOne: async () => game,
-  } : { create: async data => { payload = data; return player; }, getOne: async () => player } };
+  } : { create: async () => { throw new Error('Generic player creation is insecure'); } }, send: async (path, options) => {
+    payload = options.body;
+    if (path.endsWith('/join')) return { gameId: 'g', playerId: 'p', token: 'secret' };
+    if (player.game !== 'g') throw new Error('Invalid session');
+    assert.equal(options.body.token, 'secret');
+    return { game, me: player };
+  } };
   assert.equal(typeof lobby.joinLobby, 'function');
   await assert.rejects(lobby.joinLobby(pb, 'bad!', 'Ada'), /6/);
   const session = await lobby.joinLobby(pb, 'abc123', ' Ada ');
-  assert.deepEqual(payload, { game: 'g', nickname: 'Ada' });
-  assert.deepEqual(session, { gameId: 'g', playerId: 'p' });
-  assert.deepEqual(await lobby.restoreSession(pb, session), { game, player });
+  assert.deepEqual(payload, { playerId: 'p', token: 'secret' });
+  assert.deepEqual(session, { gameId: 'g', playerId: 'p', token: 'secret' });
+  assert.deepEqual(await lobby.restoreSession(pb, session), { game, me: player });
   player.game = 'other';
   await assert.rejects(lobby.restoreSession(pb, session), /session/i);
   game.status = 'finished';

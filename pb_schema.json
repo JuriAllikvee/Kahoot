@@ -280,6 +280,32 @@
       },
       {
         "system": false,
+        "id": "date_deadline",
+        "name": "questionDeadline",
+        "type": "date",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "system": false,
+        "id": "json_snapshot",
+        "name": "questionSnapshot",
+        "type": "json",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "system": false,
+        "id": "num_position",
+        "name": "questionPosition",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "onlyInt": true,
+        "min": 0
+      },
+      {
+        "system": false,
         "id": "autodate2990389176",
         "name": "created",
         "type": "autodate",

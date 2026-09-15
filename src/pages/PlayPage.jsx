@@ -27,8 +27,7 @@ export default function PlayPage() {
       .catch(err => { if (active) setError(`Unable to restore this session. ${err.message}`); });
     return () => { active = false; };
   }, [session, attempt]);
-  function joined(gameId, playerId) {
-    const next = { gameId, playerId };
+  function joined(next) {
     try { localStorage.setItem('quizSession', JSON.stringify(next)); }
     catch { setError('Browser storage is unavailable. This session will not survive a reload.'); }
     setSession(next);
@@ -40,7 +39,7 @@ export default function PlayPage() {
   if (!session) return <JoinGame onJoin={joined} />;
   return <PageShell><main id="main" className="form-main">
     {error && <p className="error-message" role="alert">{error} <button className="text-button" onClick={() => setAttempt(value => value + 1)}>Retry</button></p>}
-    {verified ? <LobbyPanel key={session.gameId} gameId={session.gameId} playerId={session.playerId} /> : !error && <p role="status">Restoring your session…</p>}
+    {verified ? <LobbyPanel key={session.gameId} gameId={session.gameId} session={session} /> : !error && <p role="status">Restoring your session…</p>}
     <p><button className="button secondary" onClick={clearSession}>Clear this session</button></p>
     <p className="field-help">Clearing only forgets this browser’s session. Your nickname remains on the host’s player list.</p>
     <Link to="/" className="back-link">Back to home</Link>
